@@ -3,7 +3,7 @@
 // "tier" (application | infrastructure) para separar logs de app e infraestructura.
 
 discovery.docker "containers" {
-    host = "unix://var/run/docker.sock"
+    host = "unix:///var/run/docker.sock"
 }
 
 discovery.relabel "containers" {
@@ -11,21 +11,21 @@ discovery.relabel "containers" {
 
     // Nombre del contenedor
     rule {
-        source_labels = ["_meta_docker_container_name"]
+        source_labels = ["__meta_docker_container_name"]
         regex         = "/(.*)"
-        targets_label = "container"
+        target_label = "container"
     }
 
     // Nombre del servicio definido en docker-compose
     rule {
-        source_labels = ["__meta_container_label_co,_docker_compose_service"]
+        source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
         target_label  = "service"
     }
 
     // Por defecto, todo es infraestructura
     rule  {
         target_label = "tier"
-        replacement  = "infraestructura"
+        replacement  = "infrastructure"
     }
 
     // backend/frontend se marcan como aplicación
@@ -33,12 +33,12 @@ discovery.relabel "containers" {
         source_labels = ["__meta_docker_container_name"]
         regex         = "/(lab-backend|lab-frontend)"
         target_label  = "tier"
-        replacement   = "aplication"
+        replacement   = "application"
     }
 }
 
 loki.source.docker "containers" {
-    host       = "unix://var/run/docker.sock"
+    host       = "unix:///var/run/docker.sock"
     targets    = discovery.relabel.containers.output
     forward_to = [loki.write.default.receiver]
 }
