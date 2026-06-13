@@ -1,1 +1,5 @@
 /grafana/solucion
+.DS_Store
+node_modules/
+prometheus-data/
+grafana/data/
